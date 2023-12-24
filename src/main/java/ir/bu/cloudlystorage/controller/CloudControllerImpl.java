@@ -1,24 +1,27 @@
 package ir.bu.cloudlystorage.controller;
 
+import ir.bu.cloudlystorage.dto.FileForRequestQueryDto;
 import ir.bu.cloudlystorage.dto.TokenDto;
-import ir.bu.cloudlystorage.model.CloudUser;
-import ir.bu.cloudlystorage.service.FileServiceImpl;
-import jakarta.validation.Valid;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import ir.bu.cloudlystorage.dto.UserDto;
+import ir.bu.cloudlystorage.service.CloudFilesService;
+import ir.bu.cloudlystorage.service.CloudUserService;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/cloud")
-@Validated
+@CrossOrigin(origins = "http://localhost:8081")
 public class CloudControllerImpl implements CloudController {
 
-    private final FileServiceImpl service;
+    private final CloudFilesService filesService;
+    private final CloudUserService usersService;
 
-    public CloudControllerImpl(FileServiceImpl service) {
-        this.service = service;
+    public CloudControllerImpl(CloudFilesService filesService, CloudUserService usersService) {
+        this.filesService = filesService;
+        this.usersService = usersService;
     }
 
     @GetMapping("/hi")
@@ -28,44 +31,52 @@ public class CloudControllerImpl implements CloudController {
 
     @PostMapping("/login")
     @Override
-    public TokenDto login(@Valid CloudUser cloudUser) {
-        service.login(cloudUser);
-        return new TokenDto();
+    public TokenDto login(@RequestBody UserDto userDto) {
+        String authToken = usersService.loginAndGetToken(userDto);
+        return new TokenDto(authToken);
     }
 
-//    @PostMapping("/logout")
-//    @Override
-//    public void logout(CloudUser cloudUser) {
-//        service.logout(cloudUser);
-//    }
-//
-//    @PostMapping(value = "/file")
-//    @Override
-//    public void uploadFile(File file, CloudUser cloudUser) {
-//        service.uploadFile(file, cloudUser);
-//    }
-//
+    @PostMapping("/logout")
+    @Override
+    public void logout(@RequestHeader(name = "auth-token") String token) {
+        usersService.logout(token);
+    }
+
+    @PostMapping("/file")
+    @Override
+    public void uploadFile(@RequestParam("filename") String fileName, @RequestParam("file") MultipartFile file) throws IOException {
+        filesService.uploadFile(file, new FileForRequestQueryDto(fileName));
+    }
+
+    @DeleteMapping("/file")
+    @Override
+    public void deleteFile(@RequestParam("filename") String fileName) {
+        filesService.deleteFile(new FileForRequestQueryDto(fileName));
+    }
 //    @DeleteMapping("/file")
 //    @Override
-//    public void deleteFile(File file, CloudUser cloudUser) {
-//        service.deleteFile(file);
-//    }
+//    public ResponseEntity<?> deleteFile(@RequestParam("filename") String fileName) {
 //
-//    @GetMapping
-//    @Override
-//    public void downLoadFile(CloudUser cloudUser) {
-//        service.downLoadFile();
-//    }
+//        fileRepository.deleteByFilename(fileName);
 //
-//    @PutMapping("/file")
-//    @Override
-//    public void editFileName(File file, CloudUser cloudUser) {
-//        service.editFileName(file);
+//        return ResponseEntity.noContent().build();
 //    }
-//
-//    @GetMapping("/list")
-//    @Override
-//    public void getAllFiles(CloudUser cloudUser) {
-//        service.getAllFiles();
-//    }
+
+    @GetMapping("/file")
+    @Override
+    public void downLoadFile(@RequestParam("filename") String fileName) {
+        filesService.downLoadFile(new FileForRequestQueryDto(fileName));
+    }
+
+    @PutMapping("/file")
+    @Override
+    public void editFileName(@RequestParam("filename") String fileName, @RequestBody FileForRequestQueryDto fileForRequestQueryDto) {
+        filesService.editFileName(fileName, fileForRequestQueryDto);
+    }
+
+    @GetMapping("/list")
+    @Override
+    public void getAllFiles(@RequestParam("limit") int limit) {
+        filesService.getAllFiles(Pageable.ofSize(limit));
+    }
 }

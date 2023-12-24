@@ -1,7 +1,8 @@
 package ir.bu.cloudlystorage.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,29 +13,25 @@ import java.util.Collection;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Embeddable
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"login", "password", "token"})
-@Table(name = "diploma", schema = "login")
+@EqualsAndHashCode(of = {"login", "password"})
+@Table(name = "users", schema = "diploma")
 public class CloudUser implements UserDetails {
-    @EmbeddedId
-    @Column(name = "login")
-    @NotNull
-    private String username;
-    @NotNull
-    @Column
+    @Id
+    private String login;
     private String password;
-    @Column
     private String token;
-    @Column
     private boolean enabled;
 
     @Override
     public String toString() {
         return "CloudUser{" +
-                "login='" + username + '\'' +
+                "login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", token='" + token + '\'' +
+                ", enabled=" + enabled +
                 '}';
     }
 
@@ -45,7 +42,7 @@ public class CloudUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return login;
     }
 
     @Override

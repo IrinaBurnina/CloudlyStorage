@@ -1,0 +1,20 @@
+version: '1'
+
+services:
+  cloud_storage_backend:
+    image: 'cloud_storage:latest'
+    network_mode: host
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - '8081:8081'
+    depends_on:
+      - postgres
+  postgres:
+    image: 'postgres'
+    volumes:
+      - /pg_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'

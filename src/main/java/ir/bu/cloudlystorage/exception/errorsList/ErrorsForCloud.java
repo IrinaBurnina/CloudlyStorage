@@ -11,7 +11,8 @@ public enum ErrorsForCloud {
     ERROR_UPLOAD_FILE("Error upload file. File isn't upload.", 5),
     ERROR_UPLOAD_DATA("Error upload data. Uploading data isn't corrected.", 6),
     ERROR_GETTING_FILE_LIST("Error getting file list. Files aren't getting.", 7),
-    TOKEN_NOT_FOUND_EXCEPTION("Token is not found.", 8);
+    TOKEN_NOT_FOUND("Token is not found.", 8),
+    FILE_NOT_FOUND("File is not found.", 9);
 
     private final Integer id;
     private final String message;

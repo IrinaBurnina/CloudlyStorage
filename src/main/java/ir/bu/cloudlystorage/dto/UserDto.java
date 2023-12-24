@@ -1,9 +1,7 @@
 package ir.bu.cloudlystorage.dto;
 
-import lombok.NoArgsConstructor;
+import lombok.Builder;
 
-
-@NoArgsConstructor
+@Builder
 public record UserDto(String login, String password) {
-
 }

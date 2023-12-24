@@ -1,33 +1,27 @@
 package ir.bu.cloudlystorage.config;
 
-import ir.bu.cloudlystorage.model.CloudUser;
+import ir.bu.cloudlystorage.exception.UserNotFoundException;
 import ir.bu.cloudlystorage.repository.UsersRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.bind.support.WebDataBinderFactory;
-import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.List;
-
 @Configuration
-@EnableWebMvc
-@EnableMethodSecurity(securedEnabled = true, jsr250Enabled = true)
+@EnableWebSecurity
 class WebConfig implements WebMvcConfigurer {
     private final UsersRepository usersRepository;
 
@@ -39,8 +33,9 @@ class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowCredentials(true)
-                .allowedOrigins("http://localhost:8081")  //-ЭТО АДРЕС ФРОНТА
-                .allowedMethods("*");
+                .allowedOrigins("http://localhost:8081")
+                .allowedMethods("*")
+                .allowedHeaders("*");
     }
 
     @Bean
@@ -48,54 +43,31 @@ class WebConfig implements WebMvcConfigurer {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Override
-    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new CustomParamResolverImplHandlerMethodArgumentResolver());
-    }
-
-    private class CustomParamResolverImplHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
-        @Override
-        public boolean supportsParameter(MethodParameter parameter) {
-            return parameter.getParameterType().equals(CloudUser.class);
-        }
-
-        @Override
-        public Object resolveArgument(MethodParameter parameter,
-                                      ModelAndViewContainer mavContainer,
-                                      NativeWebRequest webRequest,
-                                      WebDataBinderFactory binderFactory) {
-            String name = webRequest.getParameter("user");
-            String password = webRequest.getParameter("password");
-            return new CloudUser(name, password, null, true);
-        }
-    }
-//    @Bean
-//    public DataSource dataSource() {
-//        return new EmbeddedDatabaseBuilder()
-//                .setType(EmbeddedDatabaseType.valueOf("Postgres"))
-//                .addScript(JdbcDaoImpl.DEF_USERS_BY_USERNAME_QUERY)
-//                .build();
-//    }
-
     @Bean
     public UserDetailsService userDetailsService() {
-        return login() - > usersRepository
-                .getUserByLogin(login)
-                .orElseThrow(() -> new NotFoundUser);
+        return login -> usersRepository.getUserByLogin(login)
+                .orElseThrow(() -> new UserNotFoundException("User is not found."));
 
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, UserAuthorizationFilter userAuthorizationFilter) throws Exception {
-        http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
-                        .requestMatchers(HttpMethod.GET, "/hi", "/login", "/logout").permitAll()
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
+                        .requestMatchers(HttpMethod.GET, "/cloud/hi", "/cloud/login", "/cloud/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/cloud/login").permitAll()
                         .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
-                .logout(Customizer.withDefaults())
+                .logout(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(Customizer.withDefaults())
                 .addFilterBefore(userAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 }

@@ -1,20 +1,18 @@
 package ir.bu.cloudlystorage.repository;
 
-import ir.bu.cloudlystorage.dto.UserDto;
 import ir.bu.cloudlystorage.model.CloudUser;
-import ir.bu.cloudlystorage.model.File;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UsersRepository extends CrudRepository<CloudUser, List<File>> {
-    //    void login(CloudUser cloudUser);
-//    List<CloudUser> findAll();
-//    List<File> getAllByUsername(String login);
-    Optional<UserDto> getUserByLogin(String login);
+public interface UsersRepository extends JpaRepository<CloudUser, String> {
+    @Query(value = "select c from CloudUser c where c.login=:login")
+    Optional<CloudUser> getUserByLogin(@Param("login") String login);
 
-    Optional<UserDto> getUserByToken(String token);
+    @Query(value = "select c from CloudUser c where c.token=:authToken")
+    Optional<CloudUser> getUserByToken(@Param("authToken") String authToken);
 }

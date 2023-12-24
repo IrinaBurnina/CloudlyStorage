@@ -4,29 +4,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Data
 @Builder
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"fileName", "login"})
+@EqualsAndHashCode(exclude = "id")
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "files", schema = "diploma")
 public class File implements Serializable {
-    @Column(name = "filename")
-    @EmbeddedId
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    private long id;
+    @Column(name = "filename", nullable = false)
     private String fileName;
-    @Column
-    private Long size;
+    private long size;
     @Column(name = "file", columnDefinition = "bytea")
     @Lob
     private byte[] content;
-    @Column(name = "filepath")
-    private String filePath;
-    @EmbeddedId
-    @JoinColumn
+    @JoinColumn(name = "user_id")
     @ManyToOne
-    private String login;
+    private CloudUser user;
+    private LocalDate data;
 }
