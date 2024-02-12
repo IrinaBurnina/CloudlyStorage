@@ -4,7 +4,7 @@ import ir.bu.cloudlystorage.dto.authDto.TokenDto;
 import ir.bu.cloudlystorage.dto.authDto.UserDto;
 
 public interface AuthorizationController {
-    TokenDto login(UserDto userDto);//TODO зачем мне тут этот метод?
+    TokenDto login(UserDto userDto);
 
     void logout(String token);
 }

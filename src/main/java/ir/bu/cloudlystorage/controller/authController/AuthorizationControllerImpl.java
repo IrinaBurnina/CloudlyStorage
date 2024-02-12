@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-//TODO адаптировать тесты для вынесенного контроллера
 @AllArgsConstructor
 public class AuthorizationControllerImpl implements AuthorizationController {
     private final CloudUserService usersService;
