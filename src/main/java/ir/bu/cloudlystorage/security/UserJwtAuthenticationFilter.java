@@ -1,15 +1,15 @@
-package ir.bu.cloudlystorage.config;
+package ir.bu.cloudlystorage.security;
 
-import ir.bu.cloudlystorage.dto.TokenDto;
+import ir.bu.cloudlystorage.dto.authDto.TokenDto;
 import ir.bu.cloudlystorage.exception.TokenNotFoundException;
-import ir.bu.cloudlystorage.exception.UserNotFoundException;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.service.CloudUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Qualifier;
+import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -21,33 +21,33 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Component
-public class UserAuthorizationFilter extends OncePerRequestFilter {
+public class UserJwtAuthenticationFilter extends OncePerRequestFilter {
+    private final String AUTHORIZATION = "auth-token";
     private static final String PREFIX_HEADER = "Bearer ";
     private final CloudUserService service;
+    private final JwtTokenProvider tokenProvider;
+    ;
     private final HandlerExceptionResolver resolver;
 
-    public UserAuthorizationFilter(CloudUserService service, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
-        this.service = service;
-        this.resolver = resolver;
-    }
-
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String gettingToken = getTokenFromRequest(request);
-        String token = new TokenDto().generate();
-        if (gettingToken != null /*&& !"".equals(gettingToken.trim())
-                && SecurityContextHolder.getContext().getAuthentication() == null*/) {
-            Optional<CloudUser> userOptional = service.findByToken(new TokenDto(gettingToken));
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
+                                    @NonNull HttpServletResponse response,
+                                    @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
+        String jwt = getJwtTokenFromRequest(request);
+        if (jwt != null && tokenProvider.validateToken(jwt)) {
+            Optional<CloudUser> userOptional = service
+                    .findByToken(new TokenDto(jwt));
             if (userOptional.isPresent()) {
-                CloudUser user = userOptional.get();
+                CloudUser cloudUser = userOptional.get();
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        user, null, user.getAuthorities());
+                        cloudUser, null, cloudUser.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } else {
-                resolver.resolveException(request, response, null, new UserNotFoundException("User not found"));
+                resolver.resolveException(request, response, null, new TokenNotFoundException("Token not found"));
                 return;
             }
         } else if (!request.getRequestURI().equals("/login")) {
@@ -57,8 +57,8 @@ public class UserAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private String getTokenFromRequest(HttpServletRequest request) {
-        String authToken = request.getHeader("auth-token");
+    private String getJwtTokenFromRequest(HttpServletRequest request) {
+        String authToken = request.getHeader(AUTHORIZATION);
         if (StringUtils.hasText(authToken) && authToken.startsWith(PREFIX_HEADER)) {
             return authToken.substring(7);
         }

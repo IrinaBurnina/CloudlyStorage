@@ -1,9 +1,7 @@
 package ir.bu.cloudlystorage.security;
 
-import ir.bu.cloudlystorage.config.UserAuthorizationFilter;
-import ir.bu.cloudlystorage.dto.TokenDto;
+import ir.bu.cloudlystorage.dto.authDto.TokenDto;
 import ir.bu.cloudlystorage.exception.TokenNotFoundException;
-import ir.bu.cloudlystorage.exception.UserNotFoundException;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.service.CloudUserService;
 import jakarta.servlet.FilterChain;
@@ -21,8 +19,9 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 import java.util.Optional;
 
-public class SecurityConfigurationTest {
+public class SecurityConfigTest {
     CloudUserService userService = Mockito.mock(CloudUserService.class);
+    JwtTokenProvider jwtTokenProvider = Mockito.mock(JwtTokenProvider.class);
     HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     HandlerExceptionResolver resolver = Mockito.mock(HandlerExceptionResolver.class);
     HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -31,8 +30,8 @@ public class SecurityConfigurationTest {
     @Test
     public void doFilterInternalTest() throws IOException, ServletException {
         //arrange
-        String token = "Bearer 00002222";
-        Mockito.when(request.getHeader("auth-token")).thenReturn(token);
+        String jwt = "Bearer 00002222";
+        Mockito.when(request.getHeader("auth-token")).thenReturn(jwt);
         int wantedNumberInvocationInt = 1;
         CloudUser cloudUser = new CloudUser();
         Optional<CloudUser> optionalCloudUser = Optional.of(cloudUser);
@@ -42,25 +41,31 @@ public class SecurityConfigurationTest {
         SecurityContext securityContext = Mockito.mock(SecurityContext.class);
         SecurityContextHolder.setContext(securityContext);
         Mockito.when(userService.findByToken(new TokenDto("00002222"))).thenReturn(optionalCloudUser);
-        UserAuthorizationFilter userAuthorizationFilter = new UserAuthorizationFilter(userService, resolver);
+        UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
+                userService,
+                jwtTokenProvider,
+                resolver);
         //act
-        userAuthorizationFilter.doFilter(request, response, filterChain);
+        userJwtAuthenticationFilter.doFilter(request, response, filterChain);
         //assert
         Mockito.verify(securityContext, Mockito.times(wantedNumberInvocationInt))
                 .setAuthentication(authentication);
     }
 
     @Test
-    public void doFilterInternalUserNotFoundExceptionTest() throws ServletException, IOException {
+    public void doFilterInternalTokeNotFoundExceptionTest() throws ServletException, IOException {
         //arrange
         int wantedNumberInvocationInt = 1;
         Mockito.when(request.getRequestURI()).thenReturn("/file");
-        UserAuthorizationFilter userAuthorizationFilter = new UserAuthorizationFilter(userService, resolver);
+        UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
+                userService,
+                jwtTokenProvider,
+                resolver);
         //act
-        userAuthorizationFilter.doFilter(request, response, filterChain);
+        userJwtAuthenticationFilter.doFilter(request, response, filterChain);
         //assert
         Mockito.verify(resolver, Mockito.times(wantedNumberInvocationInt))
-                .resolveException(request, response, null, new UserNotFoundException("User not found"));
+                .resolveException(request, response, null, new TokenNotFoundException("Token not found"));
     }
 
     @Test
@@ -70,9 +75,12 @@ public class SecurityConfigurationTest {
         String token = "Bearer 00002222";
         Mockito.when(request.getHeader("auth-token")).thenReturn(token);
         Mockito.when(userService.findByToken(new TokenDto("00002222"))).thenReturn(Optional.empty());
-        UserAuthorizationFilter userAuthorizationFilter = new UserAuthorizationFilter(userService, resolver);
+        UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
+                userService,
+                jwtTokenProvider,
+                resolver);
         //act
-        userAuthorizationFilter.doFilter(request, response, filterChain);
+        userJwtAuthenticationFilter.doFilter(request, response, filterChain);
         //assert
         Mockito.verify(resolver, Mockito.times(wantedNumberInvocationInt))
                 .resolveException(request, response, null, new TokenNotFoundException("Token not found"));

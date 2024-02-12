@@ -1,25 +1,23 @@
 package ir.bu.cloudlystorage.service;
 
-import ir.bu.cloudlystorage.dto.FileForRequestQueryDto;
-import ir.bu.cloudlystorage.dto.FileForResponseDeleteDownloadDto;
+import ir.bu.cloudlystorage.dto.FileForResponseDownloadDto;
 import ir.bu.cloudlystorage.dto.FileForResponseGetDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Service
 public interface CloudFilesService {
 
-    void uploadFile(MultipartFile file, FileForRequestQueryDto fileForRequestQueryDto) throws IOException;
+    void uploadFile(MultipartFile file, String fileName);
 
-    FileForResponseDeleteDownloadDto deleteFile(FileForRequestQueryDto fileForRequestQueryDto);
+    void deleteFile(String fileName);
 
-    FileForResponseDeleteDownloadDto downLoadFile(FileForRequestQueryDto fileForRequestQueryDto);
+    FileForResponseDownloadDto downLoadFile(String fileName);
 
-    void editFileName(String fileName, FileForRequestQueryDto fileForRequestQueryDto);
+    void editFileName(String fileNameOld, String fileName);
 
     List<FileForResponseGetDto> getAllFiles(Pageable ofSize);
 

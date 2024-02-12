@@ -1,8 +1,10 @@
 package ir.bu.cloudlystorage.exception.errorsList;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
+@AllArgsConstructor
 public enum ErrorsForCloud {
     BAD_CREDENTIALS("Bad credentials. Authorization error. The entered login or password isn't corrected.", 1),
     ERROR_INPUT_DATA("Error input data. The entered data isn't corrected.", 2),
@@ -13,14 +15,8 @@ public enum ErrorsForCloud {
     ERROR_GETTING_FILE_LIST("Error getting file list. Files aren't getting.", 7),
     TOKEN_NOT_FOUND("Token is not found.", 8),
     FILE_NOT_FOUND("File is not found.", 9);
-
-    private final Integer id;
     private final String message;
-
-    ErrorsForCloud(String message, Integer id) {
-        this.message = message;
-        this.id = id;
-    }
+    private final Integer id;
 
     @Override
     public String toString() {

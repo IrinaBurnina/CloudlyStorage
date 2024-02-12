@@ -1,9 +1,9 @@
 package ir.bu.cloudlystorage.testcontainer;
 
-import ir.bu.cloudlystorage.dto.FileForRequestQueryDto;
+import ir.bu.cloudlystorage.dto.FileForRequestDto;
 import ir.bu.cloudlystorage.dto.FileForResponseGetDto;
-import ir.bu.cloudlystorage.dto.TokenDto;
-import ir.bu.cloudlystorage.dto.UserDto;
+import ir.bu.cloudlystorage.dto.authDto.TokenDto;
+import ir.bu.cloudlystorage.dto.authDto.UserDto;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.model.File;
 import ir.bu.cloudlystorage.repository.FilesRepository;
@@ -113,11 +113,11 @@ public class CloudStorageTestContainer {
                 , headers);
 
         //act
-        ResponseEntity<List<FileForRequestQueryDto>> responseEntity = testRestTemplate.exchange(url
+        ResponseEntity<List<FileForRequestDto>> responseEntity = testRestTemplate.exchange(url
                 , HttpMethod.GET
                 , new HttpEntity<>(headers), new ParameterizedTypeReference<>() {
                 });
-        List<FileForRequestQueryDto> files = responseEntity.getBody();
+        List<FileForRequestDto> files = responseEntity.getBody();
         //assert
         Assertions.assertNotNull(files);
         Assertions.assertFalse(files.isEmpty());

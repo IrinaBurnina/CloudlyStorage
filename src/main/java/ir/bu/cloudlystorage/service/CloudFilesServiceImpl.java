@@ -1,12 +1,12 @@
 package ir.bu.cloudlystorage.service;
 
-import ir.bu.cloudlystorage.dto.FileForRequestQueryDto;
-import ir.bu.cloudlystorage.dto.FileForResponseDeleteDownloadDto;
+import ir.bu.cloudlystorage.dto.FileForResponseDownloadDto;
 import ir.bu.cloudlystorage.dto.FileForResponseGetDto;
 import ir.bu.cloudlystorage.exception.*;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.model.File;
 import ir.bu.cloudlystorage.repository.FilesRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,54 +18,50 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Service
+@AllArgsConstructor
 public class CloudFilesServiceImpl implements CloudFilesService {
     private final FilesRepository repository;
-
-    public CloudFilesServiceImpl(/*@Qualifier (value = "files")*/ FilesRepository repository) {
-        this.repository = repository;
-    }
+    private final AtomicLong counter = new AtomicLong(1);
 
     @Override
-    public void uploadFile(MultipartFile file, FileForRequestQueryDto fileForRequestQueryDto) {
+    public void uploadFile(MultipartFile file, String fileName) {
         try {
-            repository.save(new File(0, fileForRequestQueryDto.getFileName(), file.getSize(),
-                    file.getBytes(), getAuthenticatedUser(), LocalDate.now()));
+            repository.save(new File(
+                            counter.getAndIncrement(),
+                            fileName,
+                            file.getSize(),
+                            file.getBytes(),
+                            getAuthenticatedUser(),
+                            LocalDate.now()
+                    )
+            );
         } catch (IOException exception) {
             throw new ErrorInputData("Error input data of uploading file.");
         }
-
     }
 
     @Override
-    public FileForResponseDeleteDownloadDto deleteFile(FileForRequestQueryDto fileForRequestQueryDto) {
-        File file = getFileByFileNameAndUser(fileForRequestQueryDto.getFileName(), getAuthenticatedUser());
+    public void deleteFile(String fileName) {
+        File file = getFileByFileNameAndUser(fileName, getAuthenticatedUser());
         if (file == null) {
             throw new ErrorDeleteFile("Error of deleting file.");
         }
         repository.delete(file);
-        return new FileForResponseDeleteDownloadDto((MultipartFile) file);
     }
 
     @Override
-    public FileForResponseDeleteDownloadDto downLoadFile(FileForRequestQueryDto fileForRequestQueryDto) {
-//        new ByteArrayResource(
-//                getFileByFileNameAndUser(
-//                        fileForRequestQueryDto.getFileName(),
-//                        getAuthenticatedUser()).getContent()
-//        );
-        return new FileForResponseDeleteDownloadDto(
-                (MultipartFile) getFileByFileNameAndUser(
-                        fileForRequestQueryDto.getFileName(),
-                        getAuthenticatedUser()
-                )
+    public FileForResponseDownloadDto downLoadFile(String fileName) {
+        return new FileForResponseDownloadDto(
+                (MultipartFile) getFileByFileNameAndUser(fileName, getAuthenticatedUser())
         );
     }
 
     @Override
-    public void editFileName(String fileName, FileForRequestQueryDto fileForRequestQueryDto) {
-        File file = getFileByFileNameAndUser(fileForRequestQueryDto.getFileName(), getAuthenticatedUser());
+    public void editFileName(String fileNameOld, String fileName) {
+        File file = getFileByFileNameAndUser(fileNameOld, getAuthenticatedUser());
         file.setFileName(fileName);
         repository.save(file);
     }

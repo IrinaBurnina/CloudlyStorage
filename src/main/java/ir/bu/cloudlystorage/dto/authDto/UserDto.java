@@ -1,4 +1,4 @@
-package ir.bu.cloudlystorage.dto;
+package ir.bu.cloudlystorage.dto.authDto;
 
 import lombok.Builder;
 

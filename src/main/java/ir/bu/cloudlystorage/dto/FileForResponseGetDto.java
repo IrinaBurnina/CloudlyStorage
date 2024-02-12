@@ -1,16 +1,8 @@
 package ir.bu.cloudlystorage.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.Builder;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Builder
-@Getter
-@Setter
-@EqualsAndHashCode
-public class FileForResponseGetDto {
-    @JsonProperty(value = "filename")
-    private String fileName;
-    private Integer size;
+public record FileForResponseGetDto(@JsonProperty(value = "filename") String fileName, Integer size) {
 }

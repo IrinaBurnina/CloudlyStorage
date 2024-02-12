@@ -1,31 +1,25 @@
 package ir.bu.cloudlystorage.controller;
 
-import ir.bu.cloudlystorage.dto.FileForRequestQueryDto;
-import ir.bu.cloudlystorage.dto.TokenDto;
-import ir.bu.cloudlystorage.dto.UserDto;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import ir.bu.cloudlystorage.dto.FileForRequestDto;
+import ir.bu.cloudlystorage.dto.FileForResponseDownloadDto;
+import ir.bu.cloudlystorage.dto.FileForResponseGetDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public interface CloudController {
-    TokenDto login(UserDto userDto);
+    ResponseEntity<?> uploadFile(String fileName, MultipartFile file) throws IOException;
 
-    void logout(String token);
+    ResponseEntity<?> deleteFile(String fileName);
 
-    void uploadFile(String fileName, MultipartFile file) throws IOException;
+    ResponseEntity<FileForResponseDownloadDto> downLoadFile(String fileName);
 
-    void deleteFile(String fileName);
+    ResponseEntity<?> editFileName(String fileName, FileForRequestDto fileForRequestDto);
 
-    void downLoadFile(String fileName);
 
-    void editFileName(String fileName, FileForRequestQueryDto fileForRequestQueryDto);
-
-    @GetMapping("/list")
-    void getAllFiles(@RequestParam("limit") int limit);
-
-    // void getAllFiles(int limit);
+    List<FileForResponseGetDto> getAllFiles(int limit);
 }

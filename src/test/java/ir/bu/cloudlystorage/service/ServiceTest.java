@@ -1,10 +1,11 @@
 package ir.bu.cloudlystorage.service;
 
-import ir.bu.cloudlystorage.dto.TokenDto;
-import ir.bu.cloudlystorage.dto.UserDto;
+import ir.bu.cloudlystorage.dto.authDto.TokenDto;
+import ir.bu.cloudlystorage.dto.authDto.UserDto;
 import ir.bu.cloudlystorage.exception.UserNotFoundException;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.repository.UsersRepository;
+import ir.bu.cloudlystorage.security.JwtTokenProvider;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -19,7 +20,8 @@ public class ServiceTest {
     TokenDto token = Mockito.mock(TokenDto.class);
     UsersRepository usersRepository = Mockito.mock(UsersRepository.class);
     AuthenticationManager authenticationManager = Mockito.mock(AuthenticationManager.class);
-    CloudUserService service = new CloudUserServiceImpl(usersRepository, authenticationManager, token);
+    JwtTokenProvider jwtTokenProvider = Mockito.mock(JwtTokenProvider.class);
+    CloudUserService service = new CloudUserServiceImpl(authenticationManager, usersRepository, jwtTokenProvider);
 
     @Test
     public void findByTokenTest() {
@@ -41,10 +43,10 @@ public class ServiceTest {
         UserDto userDto = new UserDto("kot", "kot");
         var authenticationToken = new UsernamePasswordAuthenticationToken(userDto.login(), userDto.password());
         Authentication authentication = Mockito.mock(Authentication.class);
-        CloudUser cloudUser = new CloudUser("kot", "kot", null, true);
+        CloudUser cloudUser = new CloudUser("kot", "kot", null, true, null);
         String expectedToken = "00002222";
         Mockito.when(authentication.getPrincipal()).thenReturn(cloudUser);
-        Mockito.when(token.generate()).thenReturn(expectedToken);
+        Mockito.when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn(expectedToken);
         Mockito.when(authenticationManager.authenticate(authenticationToken)).thenReturn(authentication);
         //act
         String tokenActual = service.loginAndGetToken(userDto);

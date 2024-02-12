@@ -1,10 +1,12 @@
 package ir.bu.cloudlystorage.service;
 
-import ir.bu.cloudlystorage.dto.TokenDto;
-import ir.bu.cloudlystorage.dto.UserDto;
+import ir.bu.cloudlystorage.dto.authDto.TokenDto;
+import ir.bu.cloudlystorage.dto.authDto.UserDto;
 import ir.bu.cloudlystorage.exception.UserNotFoundException;
 import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.repository.UsersRepository;
+import ir.bu.cloudlystorage.security.JwtTokenProvider;
+import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,37 +14,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@AllArgsConstructor
 @Service
 public class CloudUserServiceImpl implements CloudUserService {
     AuthenticationManager authenticationManager;
     private final UsersRepository usersRepository;
-    private TokenDto token;
-
-    public CloudUserServiceImpl(UsersRepository usersRepository, AuthenticationManager authenticationManager, TokenDto token) {
-        this.usersRepository = usersRepository;
-        this.authenticationManager = authenticationManager;
-        this.token = token;
-    }
+    private JwtTokenProvider jwtTokenProvider;
 
     @Override
     public Optional<CloudUser> findByToken(TokenDto tokenDto) {
-        System.out.println("findByToken" + usersRepository.getUserByToken(tokenDto.getAuthToken()));
         return usersRepository.getUserByToken(tokenDto.getAuthToken());
     }
 
     @Override
     public String loginAndGetToken(UserDto userDto) {
-        System.out.println("1 - loginAndGetToken");
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userDto.login(), userDto.password()
                 )
         );
         CloudUser cloudUser = (CloudUser) authentication.getPrincipal();
-        cloudUser.setToken(token.generate());
-        System.out.println(token);
+        String token = jwtTokenProvider.generateAccessToken(authentication);
+        cloudUser.setToken(token);
         usersRepository.save(cloudUser);
-        return token.getAuthToken();
+        return token;
     }
 
     @Override

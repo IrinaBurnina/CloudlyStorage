@@ -1,12 +1,8 @@
-package ir.bu.cloudlystorage.dto;
+package ir.bu.cloudlystorage.dto.authDto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import org.springframework.stereotype.Component;
 
-import java.util.UUID;
-
-@Component
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -15,9 +11,4 @@ import java.util.UUID;
 public class TokenDto {
     @JsonProperty(value = "auth-token")
     private String authToken;
-
-    public String generate() {
-        authToken = UUID.randomUUID().toString();
-        return authToken;
-    }
 }
