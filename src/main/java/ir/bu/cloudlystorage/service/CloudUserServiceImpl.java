@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -24,6 +25,12 @@ public class CloudUserServiceImpl implements CloudUserService {
     @Override
     public Optional<CloudUser> findByToken(TokenDto tokenDto) {
         return usersRepository.getUserByToken(tokenDto.getAuthToken());
+    }
+
+    @Override
+    public CloudUser getByLogin(String username) {
+        return usersRepository.getUserByLogin(username)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("Username=[%s] not found", username)));
     }
 
     @Override

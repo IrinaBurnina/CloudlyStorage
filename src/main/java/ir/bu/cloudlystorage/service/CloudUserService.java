@@ -11,6 +11,8 @@ import java.util.Optional;
 public interface CloudUserService {
     Optional<CloudUser> findByToken(TokenDto tokenDto);
 
+    CloudUser getByLogin(String username);
+
     String loginAndGetToken(UserDto userDto);
 
     void logout(String token);

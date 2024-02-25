@@ -1,32 +1,36 @@
 package ir.bu.cloudlystorage.security;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import ir.bu.cloudlystorage.model.CloudUser;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
+//JWT-generator
 @Component
 public class JwtTokenProvider {
-    private static final long EXPIRE_DURATION = 24 * 60 * 60 * 1000; // 24 hour
 
-    @Value("${settings.app.jwt.secret}")
+    @Value("${jwt.secret}")
     private String SECRET_KEY;
 
-    @Value(value = "${settings.app.jwt.ExpirationInMs}")
+    @Value(value = "${jwt.ExpirationInMs}")
     private int jwtExpirationInMs;
 
 
     public String generateAccessToken(Authentication authentication) {
         CloudUser cloudUser = (CloudUser) authentication.getPrincipal();
+        final var username = authentication.getName();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
-
         return Jwts.builder()
-                .setSubject(cloudUser.getLogin())
-                .setIssuedAt(new Date())
+                .setSubject(username)
+                .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .compact();
@@ -43,18 +47,12 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(authToken);
+            Jwts.parser()
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(authToken);
             return true;
-        } catch (ExpiredJwtException e) {
-            throw new RuntimeException(e);
-        } catch (UnsupportedJwtException e) {
-            throw new RuntimeException(e);
-        } catch (MalformedJwtException e) {
-            throw new RuntimeException(e);
-        } catch (SignatureException e) {
-            throw new RuntimeException(e);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException(e);
+        } catch (ExpiredJwtException ex) {
+            throw new AuthenticationCredentialsNotFoundException("JWT was exprired or incorrect", ex.fillInStackTrace());
         }
     }
 }

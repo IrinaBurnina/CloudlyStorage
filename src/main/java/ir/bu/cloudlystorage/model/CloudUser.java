@@ -25,6 +25,8 @@ public class CloudUser implements UserDetails {
     private String token;
     private boolean enabled;
     private Collection<? extends GrantedAuthority> authorities;
+//    @ManyToMany(fetch = FetchType.LAZY)
+//    private Collection<Role> roles = List.of();
 
     public CloudUser(String login, String password, String token, boolean enabled,
                      Collection<? extends GrantedAuthority> authorities) {
