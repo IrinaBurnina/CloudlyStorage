@@ -1,21 +1,22 @@
 package ir.bu.cloudlystorage.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Getter
 @Setter
+@ToString
 @EqualsAndHashCode(of = {"login", "password"})
 @Table(name = "users", schema = "diploma")
 public class CloudUser implements UserDetails {
@@ -24,43 +25,12 @@ public class CloudUser implements UserDetails {
     private String password;
     private String token;
     private boolean enabled;
-    private Collection<? extends GrantedAuthority> authorities;
-//    @ManyToMany(fetch = FetchType.LAZY)
-//    private Collection<Role> roles = List.of();
-
-    public CloudUser(String login, String password, String token, boolean enabled,
-                     Collection<? extends GrantedAuthority> authorities) {
-        this.login = login;
-        this.password = password;
-        this.token = token;
-        this.enabled = enabled;
-        if (authorities == null) {
-            this.authorities = null;
-        } else {
-            this.authorities = new ArrayList<>(authorities);
-        }
-    }
-//    public static CloudUser create( User user) {
-//        List<GrantedAuthority> authorities = user.getRoles().stream()
-//                .map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
-//
-//        return new CloudUser(user.getId(), user.getFirstName(), user.getLastName(), user.getUsername(),
-//                user.getEmail(), user.getPassword(), authorities);
-//    }
-
-    @Override
-    public String toString() {
-        return "CloudUser{" +
-                "login='" + login + '\'' +
-                ", password='" + password + '\'' +
-                ", token='" + token + '\'' +
-                ", enabled=" + enabled +
-                '}';
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    private Collection<Role> roles = List.of();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities == null ? null : new ArrayList<>(authorities);
+        return AuthorityUtils.createAuthorityList();
     }
 
     @Override

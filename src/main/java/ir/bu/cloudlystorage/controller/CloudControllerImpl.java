@@ -23,22 +23,16 @@ public class CloudControllerImpl implements CloudController {
 
     @PostMapping("/file")
     @Override
-    public ResponseEntity<?> uploadFile(@RequestParam("filename") String fileName, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Void> uploadFile(@RequestParam("filename") String fileName, @RequestParam("file") MultipartFile file) {
         filesService.uploadFile(file, fileName);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    //@PostMapping
-//    public ResponseEntity<Product> create(@RequestBody @Valid Product product) {
-//        Product savedProduct = repo.save(product);
-//        URI productURI = URI.create("/products/" + savedProduct.getId());
-//        return ResponseEntity.created(productURI).body(savedProduct);
-//    }
     @DeleteMapping("/file")
     @Override
-    public ResponseEntity<?> deleteFile(@RequestParam("filename") String fileName) {
+    public ResponseEntity<Void> deleteFile(@RequestParam("filename") String fileName) {
         filesService.deleteFile(fileName);
-        return new ResponseEntity<>(HttpStatus.OK);        // return ResponseEntity.noContent().build();
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @GetMapping("/file")
@@ -49,8 +43,8 @@ public class CloudControllerImpl implements CloudController {
 
     @PutMapping("/file")
     @Override
-    public ResponseEntity<?> editFileName(@RequestParam("filename") String fileName,
-                                          @RequestBody FileForRequestDto fileForRequestDto) {
+    public ResponseEntity<Void> editFileName(@RequestParam("filename") String fileName,
+                                             @RequestBody FileForRequestDto fileForRequestDto) {
         filesService.editFileName(fileName, fileForRequestDto.fileName());
         return new ResponseEntity<>(HttpStatus.OK);
     }

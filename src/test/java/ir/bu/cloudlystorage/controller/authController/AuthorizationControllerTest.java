@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class AuthControllerTest {
+public class AuthorizationControllerTest {
     CloudUserService userService = Mockito.mock(CloudUserService.class);
     AuthorizationController authController = new AuthorizationControllerImpl(userService);
     String token = "00002222";
@@ -17,7 +17,7 @@ public class AuthControllerTest {
         //arrange
         UserDto userDtoTest = new UserDto("kot", "kot");
         TokenDto tokenDtoExpected = new TokenDto("00002222");
-        Mockito.when(userService.loginAndGetToken(userDtoTest)).thenReturn(token);
+        Mockito.when(userService.loginAndGetToken(userDtoTest)).thenReturn(tokenDtoExpected);
         //act
         TokenDto tokenDto = authController.login(userDtoTest);
         //assert

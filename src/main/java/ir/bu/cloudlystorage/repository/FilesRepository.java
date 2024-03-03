@@ -20,6 +20,4 @@ public interface FilesRepository extends JpaRepository<File, Long> {
     List<File> findAllFilesByLogin(@Param("login") String login);
 
     List<File> findByUser(CloudUser cloudUser, PageRequest pageRequest);
-
-    // List<File> findByCloudUserLogin(CloudUser cloudUser, Pageable pageable);
 }

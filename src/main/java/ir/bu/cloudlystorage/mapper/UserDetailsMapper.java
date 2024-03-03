@@ -9,10 +9,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UserDetailsMapper {
-
     public UserDetails mapUserToUserDetails(CloudUser user) {
         return new User(
-                user.getUsername(),
+                user.getLogin(),
                 user.getPassword(),
                 user.getRoles().stream().map(Role::getName).map(SimpleGrantedAuthority::new).toList()
         );

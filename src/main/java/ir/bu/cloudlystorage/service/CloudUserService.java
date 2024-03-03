@@ -13,7 +13,7 @@ public interface CloudUserService {
 
     CloudUser getByLogin(String username);
 
-    String loginAndGetToken(UserDto userDto);
+    TokenDto loginAndGetToken(UserDto userDto);
 
     void logout(String token);
 }

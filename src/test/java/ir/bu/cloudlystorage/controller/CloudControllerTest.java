@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class ControllerTest {
+public class CloudControllerTest {
     CloudUserService userService = Mockito.mock(CloudUserService.class);
     CloudFilesService filesService = Mockito.mock(CloudFilesService.class);
     CloudController controller = new CloudControllerImpl(filesService);

@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import ir.bu.cloudlystorage.model.CloudUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
@@ -12,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 
-//JWT-generator
 @Component
 public class JwtTokenProvider {
 
@@ -24,7 +22,6 @@ public class JwtTokenProvider {
 
 
     public String generateAccessToken(Authentication authentication) {
-        CloudUser cloudUser = (CloudUser) authentication.getPrincipal();
         final var username = authentication.getName();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
@@ -41,7 +38,6 @@ public class JwtTokenProvider {
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody();
-
         return String.valueOf(claims.getSubject());
     }
 

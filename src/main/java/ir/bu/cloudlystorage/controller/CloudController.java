@@ -12,13 +12,13 @@ import java.util.List;
 
 @RestController
 public interface CloudController {
-    ResponseEntity<?> uploadFile(String fileName, MultipartFile file) throws IOException;
+    ResponseEntity<Void> uploadFile(String fileName, MultipartFile file) throws IOException;
 
-    ResponseEntity<?> deleteFile(String fileName);
+    ResponseEntity<Void> deleteFile(String fileName);
 
     ResponseEntity<FileForResponseDownloadDto> downLoadFile(String fileName);
 
-    ResponseEntity<?> editFileName(String fileName, FileForRequestDto fileForRequestDto);
+    ResponseEntity<Void> editFileName(String fileName, FileForRequestDto fileForRequestDto);
 
 
     List<FileForResponseGetDto> getAllFiles(int limit);

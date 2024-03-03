@@ -27,7 +27,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final UserJwtAuthenticationFilter userJwtAuthenticationFilter;
-    // private final UsersRepository usersRepository;
     private final JwtAuthEntryPoint authEntryPoint;
 
     @Bean
@@ -42,31 +41,11 @@ public class SecurityConfig {
                 .authorizeRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/login", "/logout").permitAll()
                         .anyRequest().authenticated())
-                // .and()
                 .httpBasic(Customizer.withDefaults());
         http.cors(Customizer.withDefaults())
                 .addFilterBefore(userFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()
-//                .exceptionHandling()
-//                .authenticationEntryPoint(authEntryPoint)
-//                .and()
-//                .sessionManagement()
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authorizeRequests()
-//                .requestMatchers("/cloud/login/").permitAll()
-//                .anyRequest().authenticated()
-//                .and()
-//                .httpBasic();
-//        http.addFilterBefore(userJwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
@@ -90,10 +69,5 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-//    @Bean
-//    UserDetailsService userDetailsService() {
-//        return login -> usersRepository
-//                .getUserByLogin(login)
-//                .orElseThrow(() -> new UserNotFoundException("User not found"));
-//    }
+
 }

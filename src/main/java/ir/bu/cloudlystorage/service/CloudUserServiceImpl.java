@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -34,17 +35,18 @@ public class CloudUserServiceImpl implements CloudUserService {
     }
 
     @Override
-    public String loginAndGetToken(UserDto userDto) {
+    public TokenDto loginAndGetToken(UserDto userDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userDto.login(), userDto.password()
                 )
         );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         CloudUser cloudUser = (CloudUser) authentication.getPrincipal();
         String token = jwtTokenProvider.generateAccessToken(authentication);
         cloudUser.setToken(token);
         usersRepository.save(cloudUser);
-        return token;
+        return new TokenDto(token);
     }
 
     @Override

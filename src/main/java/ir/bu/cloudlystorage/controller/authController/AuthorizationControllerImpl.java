@@ -7,7 +7,9 @@ import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
 @AllArgsConstructor
 public class AuthorizationControllerImpl implements AuthorizationController {
     private final CloudUserService usersService;
@@ -15,8 +17,7 @@ public class AuthorizationControllerImpl implements AuthorizationController {
     @PostMapping("/login")
     @Override
     public TokenDto login(@RequestBody UserDto userDto) {
-        String authToken = usersService.loginAndGetToken(userDto);
-        return new TokenDto(authToken);
+        return usersService.loginAndGetToken(userDto);
     }
 
     @PostMapping("/logout")
