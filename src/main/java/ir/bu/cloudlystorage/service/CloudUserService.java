@@ -1,7 +1,6 @@
 package ir.bu.cloudlystorage.service;
 
 import ir.bu.cloudlystorage.dto.authDto.TokenDto;
-import ir.bu.cloudlystorage.dto.authDto.UserDto;
 import ir.bu.cloudlystorage.model.CloudUser;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +12,5 @@ public interface CloudUserService {
 
     CloudUser getByLogin(String username);
 
-    TokenDto loginAndGetToken(UserDto userDto);
 
-    void logout(String token);
 }

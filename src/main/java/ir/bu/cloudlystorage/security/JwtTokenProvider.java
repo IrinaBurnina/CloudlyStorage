@@ -18,13 +18,13 @@ public class JwtTokenProvider {
     private String SECRET_KEY;
 
     @Value(value = "${jwt.ExpirationInMs}")
-    private int jwtExpirationInMs;
+    private String jwtExpirationInMs;
 
 
     public String generateAccessToken(Authentication authentication) {
         final var username = authentication.getName();
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+        Date expiryDate = new Date(now.getTime() + Integer.parseInt(jwtExpirationInMs));
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)

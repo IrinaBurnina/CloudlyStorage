@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .exceptionHandling(eh -> eh
                         .authenticationEntryPoint(new JwtAuthEntryPoint())
                 )
+                .formLogin(Customizer.withDefaults())
                 .authorizeRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/login", "/logout").permitAll()
                         .anyRequest().authenticated())

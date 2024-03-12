@@ -29,3 +29,7 @@ create table diploma.files(
                                user_id varchar(50) references diploma.users (login),
                                data date default now()
 );
+create table diploma.roles (
+                                id bigserial primary key,
+                                name varchar (50)
+);

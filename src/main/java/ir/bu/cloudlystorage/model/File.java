@@ -21,6 +21,7 @@ public class File implements Serializable {
     private long id;
     @Column(name = "filename", nullable = false)
     private String fileName;
+    @Column
     private long size;
     @Column(name = "file", columnDefinition = "bytea")
     @Lob
@@ -28,5 +29,6 @@ public class File implements Serializable {
     @JoinColumn(name = "user_id")
     @ManyToOne
     private CloudUser user;
+    @Column
     private LocalDate data;
 }

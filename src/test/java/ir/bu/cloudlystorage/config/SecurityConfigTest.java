@@ -6,6 +6,7 @@ import ir.bu.cloudlystorage.model.CloudUser;
 import ir.bu.cloudlystorage.security.JwtTokenProvider;
 import ir.bu.cloudlystorage.security.UserJwtAuthenticationFilter;
 import ir.bu.cloudlystorage.service.CloudUserService;
+import ir.bu.cloudlystorage.service.security.DefaultUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import java.util.Optional;
 public class SecurityConfigTest {
     CloudUserService userService = Mockito.mock(CloudUserService.class);
     JwtTokenProvider jwtTokenProvider = Mockito.mock(JwtTokenProvider.class);
+    DefaultUserDetailsService customUserDerailsService = Mockito.mock(DefaultUserDetailsService.class);
     HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
     HandlerExceptionResolver resolver = Mockito.mock(HandlerExceptionResolver.class);
     HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
@@ -44,8 +46,8 @@ public class SecurityConfigTest {
         SecurityContextHolder.setContext(securityContext);
         Mockito.when(userService.findByToken(new TokenDto("00002222"))).thenReturn(optionalCloudUser);
         UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
-                userService,
                 jwtTokenProvider,
+                customUserDerailsService,
                 resolver);
         //act
         userJwtAuthenticationFilter.doFilter(request, response, filterChain);
@@ -60,8 +62,8 @@ public class SecurityConfigTest {
         int wantedNumberInvocationInt = 1;
         Mockito.when(request.getRequestURI()).thenReturn("/file");
         UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
-                userService,
                 jwtTokenProvider,
+                customUserDerailsService,
                 resolver);
         //act
         userJwtAuthenticationFilter.doFilter(request, response, filterChain);
@@ -78,8 +80,8 @@ public class SecurityConfigTest {
         Mockito.when(request.getHeader("auth-token")).thenReturn(token);
         Mockito.when(userService.findByToken(new TokenDto("00002222"))).thenReturn(Optional.empty());
         UserJwtAuthenticationFilter userJwtAuthenticationFilter = new UserJwtAuthenticationFilter(
-                userService,
                 jwtTokenProvider,
+                customUserDerailsService,
                 resolver);
         //act
         userJwtAuthenticationFilter.doFilter(request, response, filterChain);

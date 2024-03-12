@@ -4,8 +4,8 @@ import ir.bu.cloudlystorage.controller.authController.AuthorizationController;
 import ir.bu.cloudlystorage.controller.authController.AuthorizationControllerImpl;
 import ir.bu.cloudlystorage.dto.FileForRequestDto;
 import ir.bu.cloudlystorage.dto.FileForResponseGetDto;
+import ir.bu.cloudlystorage.service.AuthService;
 import ir.bu.cloudlystorage.service.CloudFilesService;
-import ir.bu.cloudlystorage.service.CloudUserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CloudControllerTest {
-    CloudUserService userService = Mockito.mock(CloudUserService.class);
+    AuthService userService = Mockito.mock(AuthService.class);
     CloudFilesService filesService = Mockito.mock(CloudFilesService.class);
     CloudController controller = new CloudControllerImpl(filesService);
 

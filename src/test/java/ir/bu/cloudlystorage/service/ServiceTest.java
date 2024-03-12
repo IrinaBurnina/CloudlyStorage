@@ -21,7 +21,8 @@ public class ServiceTest {
     UsersRepository usersRepository = Mockito.mock(UsersRepository.class);
     AuthenticationManager authenticationManager = Mockito.mock(AuthenticationManager.class);
     JwtTokenProvider jwtTokenProvider = Mockito.mock(JwtTokenProvider.class);
-    CloudUserService service = new CloudUserServiceImpl(authenticationManager, usersRepository, jwtTokenProvider);
+    AuthService authService = new AuthServiceImpl(authenticationManager, jwtTokenProvider, usersRepository);
+    CloudUserService userService = new CloudUserServiceImpl(usersRepository);
 
     @Test
     public void findByTokenTest() {
@@ -32,7 +33,7 @@ public class ServiceTest {
         Mockito.when(usersRepository.getUserByToken(token)).thenReturn(expectedOptionalCloudUser);
         TokenDto tokenDto = new TokenDto(token);
         //act
-        Optional<CloudUser> actualOptionalCloudUser = service.findByToken(tokenDto);
+        Optional<CloudUser> actualOptionalCloudUser = userService.findByToken(tokenDto);
         //assert
         Assertions.assertEquals(actualOptionalCloudUser, expectedOptionalCloudUser);
     }
@@ -43,13 +44,13 @@ public class ServiceTest {
         UserDto userDto = new UserDto("kot", "kot");
         var authenticationToken = new UsernamePasswordAuthenticationToken(userDto.login(), userDto.password());
         Authentication authentication = Mockito.mock(Authentication.class);
-        CloudUser cloudUser = new CloudUser("kot", "kot", null, true, null);
+        CloudUser cloudUser = new CloudUser(1L, "kot", "kot", null, true, null);
         String expectedToken = "00002222";
         Mockito.when(authentication.getPrincipal()).thenReturn(cloudUser);
         Mockito.when(jwtTokenProvider.generateAccessToken(authentication)).thenReturn(expectedToken);
         Mockito.when(authenticationManager.authenticate(authenticationToken)).thenReturn(authentication);
         //act
-        String tokenActual = service.loginAndGetToken(userDto);
+        String tokenActual = authService.loginAndGetToken(userDto).getAuthToken();
         // assert
         Assertions.assertEquals(expectedToken, tokenActual);
     }
@@ -64,7 +65,7 @@ public class ServiceTest {
         Optional<CloudUser> optionalCloudUser = Optional.of(cloudUser);
         Mockito.when(usersRepository.getUserByToken(token)).thenReturn(optionalCloudUser);
         //act
-        service.logout(tokenWithBearer);
+        authService.logout(tokenWithBearer);
         //assert
         Mockito.verify(usersRepository, Mockito.times(wantedNumberInvocationInt)).save(cloudUser);
     }
@@ -78,7 +79,7 @@ public class ServiceTest {
         Optional<CloudUser> optionalCloudUser = Optional.of(cloudUser);
         Mockito.when(usersRepository.getUserByToken(token)).thenReturn(optionalCloudUser);
         //act
-        Executable action = () -> service.logout(tokenWithBearer);
+        Executable action = () -> authService.logout(tokenWithBearer);
         //assert
         Assertions.assertThrowsExactly(UserNotFoundException.class, action);
     }
